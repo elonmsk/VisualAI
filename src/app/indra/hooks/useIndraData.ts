@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ApiResponse, Statement, GraphData } from '../types';
+import { ApiResponse } from '../types';
 
 export interface UseIndraDataReturn {
   searchTerm: string;
@@ -117,4 +117,4 @@ export function useIndraData(): UseIndraDataReturn {
     statusMessage,
     fetchIndraData
   };
-}
+} 

@@ -68,4 +68,4 @@ export interface ErrorResponse {
   error: string;
   details?: string;
   code?: string;
-}
+} 

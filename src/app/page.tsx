@@ -16,7 +16,7 @@ export default function Home() {
             <nav className="hidden md:flex space-x-8">
               <Link href="/" className="text-indigo-600 font-medium text-sm">Accueil</Link>
               <Link href="/indra" className="text-gray-600 hover:text-indigo-600 transition-colors text-sm">Recherche</Link>
-              <a href="https://github.com/elonmsk/VisualAI" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-indigo-600 transition-colors text-sm">GitHub</a>
+              <a href="https://github.com/visualai/visualai" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-indigo-600 transition-colors text-sm">GitHub</a>
             </nav>
           </div>
         </div>
@@ -30,7 +30,7 @@ export default function Home() {
               Visualisez les relations biologiques dans la littérature scientifique
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Explorez les connexions entre entités biologiques extraites automatiquement à partir d'articles scientifiques.
+              Explorez les connexions entre entités biologiques extraites automatiquement à partir d&apos;articles scientifiques.
             </p>
           </div>
           
@@ -63,7 +63,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">1. Recherchez un terme</h3>
                 <p className="text-gray-600 text-sm">
-                  Entrez un terme de recherche pour que l'application trouve les articles scientifiques pertinents.
+                  Entrez un terme de recherche pour que l&apos;application trouve les articles scientifiques pertinents.
                 </p>
               </div>
               
@@ -100,11 +100,11 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center">Exemples pour commencer</h2>
-            <p className="text-gray-600 text-center mb-10">Cliquez sur un terme pour voir les résultats d'une recherche pré-définie.</p>
+            <p className="text-gray-600 text-center mb-10">Cliquez sur un terme pour voir les résultats d&apos;une recherche pré-définie.</p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                { term: 'medulloblastoma', description: 'Tumeur cérébrale de l\'enfant' },
+                { term: 'medulloblastoma', description: 'Tumeur cérébrale de l&apos;enfant' },
                 { term: 'breast cancer', description: 'Cancer du sein' },
                 { term: 'alzheimer', description: 'Maladie neurodégénérative' },
                 { term: 'EGFR', description: 'Récepteur du facteur de croissance épidermique' },
@@ -149,7 +149,7 @@ export default function Home() {
                 Recherche
               </Link>
               <a 
-                href="https://github.com/elonmsk/VisualAI" 
+                href="https://github.com/visualai/visualai" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-indigo-600"

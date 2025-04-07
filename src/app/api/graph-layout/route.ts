@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { computeGraphLayout } from '@/app/indra/utils/graphLayout';
-import { GraphData } from '@/app/indra/types';
 
 // Délai maximum pour le calcul (en ms)
 const MAX_COMPUTATION_TIME = 30000; // 30 secondes
@@ -79,4 +78,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+} 

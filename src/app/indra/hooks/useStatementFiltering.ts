@@ -8,76 +8,81 @@ export interface UseStatementFilteringReturn {
   filterType: string;
   setFilterType: (type: string) => void;
   getUniqueStatementTypes: () => string[];
+  resetFilters: () => void;
 }
 
-// Fonction pour extraire les statements à partir de différents formats de réponse API
-function extractStatements(results: ApiResponse | null): Statement[] {
-  if (!results) return [];
+/**
+ * Extrait et filtre les statements depuis différents formats de réponse API
+ */
+const extractValidStatements = (statements: Statement[] | Record<string, Statement[]> | { statements: Statement[] }): Statement[] => {
+  let allStatements: Statement[] = [];
   
-  let statements: Statement[] = [];
-  
-  // Cas 1: statements est directement un tableau
-  if (Array.isArray(results.statements)) {
-    statements = results.statements;
-  }
-  // Cas 2: statements est un objet avec des tableaux par PMID
-  else if (typeof results.statements === 'object') {
-    // Vérifier si c'est une structure avec { statements: Statement[] }
-    if ('statements' in results.statements && Array.isArray(results.statements.statements)) {
-      statements = results.statements.statements;
+  // Extraire les statements selon le format de la réponse
+  if (Array.isArray(statements)) {
+    // Format 1: Tableau direct de statements
+    allStatements = statements;
+  } else if (typeof statements === 'object') {
+    if ('statements' in statements && Array.isArray(statements.statements)) {
+      // Format 2: { statements: [...] }
+      allStatements = statements.statements;
     } else {
-      // C'est un objet avec des clés PMID et des tableaux de statements
-      Object.values(results.statements).forEach(stmtArray => {
-        if (Array.isArray(stmtArray)) {
-          statements = statements.concat(stmtArray);
-        }
-      });
+      // Format 3: { pmid1: [...], pmid2: [...] }
+      allStatements = Object.values(statements as Record<string, Statement[]>)
+        .flatMap(statements => statements || []);
     }
   }
   
-  return statements;
-}
+  // Filtrer les statements invalides (sans sujet ou objet)
+  return allStatements.filter(stmt => 
+    stmt && stmt.type && 
+    stmt.subj && stmt.subj.name && 
+    stmt.obj && stmt.obj.name
+  );
+};
 
 export function useStatementFiltering(results: ApiResponse | null): UseStatementFilteringReturn {
-  const [filterType, setFilterType] = useState<string>('');
   const [filteredResults, setFilteredResults] = useState<Statement[] | null>(null);
+  const [filterType, setFilterType] = useState<string>('');
   
-  // Obtenir tous les types de statements uniques
-  const getUniqueStatementTypes = (): string[] => {
-    const statements = extractStatements(results);
-    if (!statements.length) return [];
-    
-    const typesSet = new Set<string>();
-    statements.forEach(stmt => {
-      if (stmt.type) typesSet.add(stmt.type);
-    });
-    
-    return Array.from(typesSet).sort();
-  };
-  
-  // Mettre à jour les résultats filtrés lorsque le filtre ou les résultats changent
+  // Effet pour filtrer les résultats quand filterType change
   useEffect(() => {
-    const statements = extractStatements(results);
-    
-    if (!statements.length) {
+    if (!results?.statements) {
       setFilteredResults(null);
       return;
     }
     
-    if (!filterType) {
-      // Aucun filtre actif: retourner tous les statements
-      setFilteredResults(statements);
-    } else {
-      // Appliquer le filtre par type
-      const filtered = statements.filter(stmt => stmt.type === filterType);
-      setFilteredResults(filtered);
+    try {
+      const allStatements = extractValidStatements(results.statements);
+      
+      if (filterType) {
+        setFilteredResults(allStatements.filter(stmt => stmt.type === filterType));
+      } else {
+        setFilteredResults(allStatements);
+      }
+    } catch (error) {
+      console.error('Erreur lors du filtrage des résultats:', error);
+      setFilteredResults([]);
     }
   }, [results, filterType]);
+  
+  // Fonction pour obtenir les types de statements uniques
+  const getUniqueStatementTypes = (): string[] => {
+    if (!results?.statements) return [];
+    
+    try {
+      const allStatements = extractValidStatements(results.statements);
+      return [...new Set(allStatements.map(stmt => stmt.type))];
+    } catch (error) {
+      console.error('Erreur lors de l\'extraction des types de statements:', error);
+      return [];
+    }
+  };
   
   return {
     filteredResults,
     filterType,
     setFilterType,
-    getUniqueStatementTypes
+    getUniqueStatementTypes,
+    resetFilters: () => setFilterType('')
   };
-}
+} 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useIndraData } from './hooks/useIndraData';
 import { useStatementFiltering } from './hooks/useStatementFiltering';
@@ -15,7 +15,17 @@ import InstructionsPanel from './components/InstructionsPanel';
 import StatusIndicator from './components/StatusIndicator';
 import { GraphData } from './types';
 
-export default function IndraPage() {
+// Composant de chargement pour Suspense
+function IndraPageLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+}
+
+// Composant principal wrapped dans Suspense
+function IndraPageContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('form');
   const [layoutType, setLayoutType] = useState<'equilibré' | 'aéré' | 'compact' | 'concentric' | 'ultra-dispersé'>('equilibré');
@@ -26,7 +36,6 @@ export default function IndraPage() {
   const {
     searchTerm,
     setSearchTerm,
-    pmids,
     results,
     loading: indraDataLoading,
     error: indraDataError,
@@ -198,17 +207,30 @@ export default function IndraPage() {
             {stmt.evidence && stmt.evidence.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium mb-2 text-gray-700 flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Preuve
-                  <span className="ml-1 text-xs text-gray-500">({stmt.evidence.length} source{stmt.evidence.length > 1 ? 's' : ''})</span>
+                  Preuves ({stmt.evidence.length})
                 </h4>
-                <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700">
-                  <p className="italic">"{stmt.evidence[0].text}"</p>
-                  <div className="mt-2 text-xs text-gray-500">
-                    Source: <a href={`https://pubmed.ncbi.nlm.nih.gov/${stmt.evidence[0].pmid}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">PMID: {stmt.evidence[0].pmid}</a>
-                  </div>
+                <div className="max-h-48 overflow-y-auto">
+                  {stmt.evidence.map((ev, i) => (
+                    <div key={i} className="mb-2 text-sm p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xs text-gray-500 mb-1 flex justify-between">
+                        <span>
+                          PMID: <a 
+                            href={`https://pubmed.ncbi.nlm.nih.gov/${ev.pmid}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 hover:underline"
+                          >
+                            {ev.pmid}
+                          </a>
+                        </span>
+                        <span>Source: {ev.source_api}</span>
+                      </div>
+                      <div className="italic text-gray-700 bg-white p-2 rounded border border-gray-100">&quot;{ev.text}&quot;</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -217,127 +239,132 @@ export default function IndraPage() {
       </div>
     );
   };
-  
-  // Rendu de la page principale
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* En-tête */}
-      <header className="border-b border-gray-100 bg-white py-4 sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <a href="/" className="text-xl font-bold text-gray-900">
-                <span className="text-indigo-600">VisualAI</span>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-gray-900">
+              <span className="text-indigo-600">VisualAI</span>
+              <span className="ml-2 px-1.5 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-normal">Beta</span>
+            </h1>
+            <nav className="hidden md:flex items-center space-x-6">
+              <a 
+                href="https://github.com/visualai/visualai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-gray-900 text-sm font-medium"
+              >
+                GitHub
               </a>
-              <span className="ml-2 px-1.5 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs">Beta</span>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="/" className="text-gray-600 hover:text-indigo-600 transition-colors text-sm">Accueil</a>
-              <a href="/indra" className="text-indigo-600 font-medium text-sm">Recherche</a>
-              <a href="https://github.com/elonmsk/VisualAI" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-indigo-600 transition-colors text-sm">GitHub</a>
+              <a 
+                href="https://pubmed.ncbi.nlm.nih.gov/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-gray-900 text-sm font-medium"
+              >
+                PubMed
+              </a>
             </nav>
           </div>
         </div>
       </header>
       
-      {/* Contenu principal avec barre latérale */}
-      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
-          
-          {/* Barre latérale */}
-          <div className="md:w-80 shrink-0 space-y-6">
-            
-            {/* Formulaire de recherche */}
-            <SearchForm 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onSubmit={handleSubmit}
-              loading={indraDataLoading}
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        <InstructionsPanel />
+        
+        <StatusIndicator 
+          loading={indraDataLoading || !!layoutStatusMessage} 
+          error={indraDataError} 
+          statusMessage={layoutStatusMessage || statusMessage}
+        />
+        
+        <section className="mb-8">
+          <SearchForm 
+            searchTerm={searchTerm} 
+            onSearchTermChange={setSearchTerm} 
+            onSubmit={handleSubmit} 
+            loading={indraDataLoading}
+          />
+        </section>
+        
+        {results && (
+          <div className="mb-6">
+            <ResultTabs 
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              showGraph={!!results?.graph}
+              showStmts={!!filteredResults && filteredResults.length > 0}
             />
             
-            {/* Affichage des indicateurs de statut */}
-            {(statusMessage || layoutStatusMessage || indraDataLoading) && (
-              <StatusIndicator 
-                message={statusMessage || layoutStatusMessage}
-                loading={indraDataLoading} 
-              />
-            )}
-            
-            {/* Message d'erreur */}
-            {indraDataError && (
-              <div className="bg-red-50 p-4 rounded-lg border border-red-100">
-                <div className="flex">
-                  <div className="shrink-0">
-                    <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">Erreur</h3>
-                    <div className="mt-2 text-sm text-red-700">{indraDataError}</div>
-                  </div>
+            <div className="mt-4 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+              {activeTab === 'graph' && results?.graph && (
+                <div>
+                  <GraphVisualization
+                    graphData={results.graph}
+                    filteredGraphData={filteredGraphData}
+                    graphPositions={graphPositions}
+                    layoutName={layoutType}
+                    onLayoutChange={changeLayout}
+                    isApplyingLayout={!!layoutStatusMessage}
+                    edgeTypes={getUniqueStatementTypes()}
+                    activeEdgeFilter={filterType}
+                    onEdgeFilterChange={setFilterType}
+                  />
                 </div>
-              </div>
-            )}
-            
-            {/* Filtres de statements (uniquement si des résultats sont disponibles) */}
-            {results && activeTab === 'statements' && (
-              <StatementFilters 
-                uniqueTypes={getUniqueStatementTypes()} 
-                selectedType={filterType}
-                onTypeChange={setFilterType}
-              />
-            )}
-            
-            {/* Instructions si l'utilisateur n'a pas encore fait de recherche */}
-            {!results && !indraDataLoading && !indraDataError && (
-              <InstructionsPanel />
-            )}
-          </div>
-          
-          {/* Zone de résultats */}
-          <div className="flex-1">
-            {/* Onglets de résultats (visibles uniquement si des résultats sont disponibles) */}
-            {results && (
-              <div className="border border-gray-200 bg-white rounded-lg overflow-hidden">
-                {/* En-tête des onglets */}
-                <ResultTabs 
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  graphNode={results.graph?.nodes?.length || 0}
-                  graphEdge={results.graph?.edges?.length || 0}
-                  statementCount={filteredResults?.length || 0}
-                  onLayoutChange={changeLayout}
-                  layoutType={layoutType}
-                />
-                
-                {/* Contenu des onglets */}
-                <div className="p-5">
-                  {activeTab === 'graph' && filteredGraphData && (
-                    <ErrorBoundary fallback={<div>Erreur lors du chargement du graphe</div>}>
-                      <GraphVisualization 
-                        graphData={filteredGraphData}
-                        nodePositions={graphPositions}
-                        layoutType={layoutType}
+              )}
+              
+              {activeTab === 'stmts' && (
+                <div className="p-4">
+                  {filteredResults && filteredResults.length > 0 && (
+                    <div className="mb-4">
+                      <StatementFilters
+                        statementTypes={getUniqueStatementTypes()}
+                        activeFilter={filterType}
+                        onFilterChange={setFilterType}
+                        totalCount={filteredResults.length}
+                        filteredCount={filterType ? filteredResults.filter(s => s.type === filterType).length : undefined}
                       />
-                    </ErrorBoundary>
+                    </div>
                   )}
-                  {activeTab === 'statements' && renderStatements()}
+                  
+                  {/* Gestion des erreurs potentielles */}
+                  <ErrorBoundary fallback={
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                      <p className="text-red-700">Une erreur s&apos;est produite lors de l&apos;affichage des résultats. Veuillez réessayer ultérieurement.</p>
+                      <button 
+                        onClick={() => window.location.reload()} 
+                        className="mt-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 rounded"
+                      >
+                        Actualiser la page
+                      </button>
+                    </div>
+                  }>
+                    {renderStatements()}
+                  </ErrorBoundary>
                 </div>
-              </div>
-            )}
-            
-            {/* Message de chargement (quand aucun résultat n'est encore disponible) */}
-            {indraDataLoading && !results && (
-              <div className="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-lg p-10 h-96">
-                <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-indigo-600 mb-4"></div>
-                <p className="text-gray-600">Chargement des données...</p>
-                <p className="text-sm text-gray-500 mt-2">{statusMessage}</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
+        )}
+      </main>
+      
+      <footer className="bg-white border-t border-gray-200 py-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-500">
+            © {new Date().getFullYear()} VisualAI. Tous droits réservés.
+          </p>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
+
+export default function IndraPage() {
+  return (
+    <Suspense fallback={<IndraPageLoading />}>
+      <IndraPageContent />
+    </Suspense>
+  );
+} 

@@ -1,77 +1,68 @@
 'use client';
 
-import React from 'react';
-
-const InstructionsPanel: React.FC = () => {
+export default function InstructionsPanel() {
   return (
-    <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-      <h3 className="text-lg font-medium text-gray-900 mb-3">Comment utiliser cet outil</h3>
-      
-      <div className="space-y-4 text-sm text-gray-600">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600">
-              1
-            </div>
-          </div>
-          <div className="ml-4">
-            <p>
-              <strong className="text-gray-900">Entrez un terme de recherche</strong> dans le formulaire à gauche.
-              Exemples : nom de gène (EGFR, TP53), maladie (Alzheimer, cancer), médicament, etc.
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600">
-              2
-            </div>
-          </div>
-          <div className="ml-4">
-            <p>
-              <strong className="text-gray-900">Explorez le graphe interactif</strong> des relations biologiques
-              extraites automatiquement de la littérature scientifique.
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600">
-              3
-            </div>
-          </div>
-          <div className="ml-4">
-            <p>
-              <strong className="text-gray-900">Filtrez par type de relation</strong> pour simplifier la visualisation.
-              Vous pouvez également changer le layout pour une meilleure lisibilité.
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600">
-              4
-            </div>
-          </div>
-          <div className="ml-4">
-            <p>
-              <strong className="text-gray-900">Consultez les détails des relations</strong> dans l'onglet "Relations"
-              pour voir les preuves et les sources associées.
-            </p>
-          </div>
-        </div>
+    <div className="bg-indigo-50 rounded-lg p-6 mb-8">
+      <div className="flex justify-between items-start mb-4">
+        <h2 className="text-xl font-bold text-indigo-800">
+          Comment utiliser INDRA Explorer
+        </h2>
       </div>
-      
-      <div className="mt-6 pt-4 border-t border-gray-100 text-xs text-gray-500">
-        <p>
-          Cette application utilise <a href="https://indra.bio/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">INDRA</a> pour extraire des relations biologiques structurées à partir d'articles scientifiques de <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">PubMed</a>.
-        </p>
+
+      <div className="space-y-4">
+        <div>
+          <h3 className="font-medium text-indigo-700 mb-2">
+            1. Recherche par terme
+          </h3>
+          <p className="text-gray-600">
+            Entrez un terme de recherche (comme &quot;cancer&quot;, &quot;alzheimer&quot;, etc.) dans le champ de
+            recherche. L&apos;application cherchera des articles pertinents et analysera les relations.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-medium text-indigo-700 mb-2">
+            2. Explorer les résultats
+          </h3>
+          <p className="text-gray-600">
+            Après la recherche, un graphe de connaissances sera généré montrant
+            les relations biologiques extraites des articles. Vous pouvez :
+          </p>
+          <ul className="list-disc list-inside mt-2 text-gray-600 space-y-1">
+            <li>Filtrer par type de relation</li>
+            <li>Changer la disposition du graphe</li>
+            <li>
+              Cliquer sur les nœuds et les connexions pour voir les détails
+            </li>
+            <li>Zoomer et déplacer le graphe pour mieux l&apos;explorer</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="font-medium text-indigo-700 mb-2">
+            3. Voir les statements détaillés
+          </h3>
+          <p className="text-gray-600">
+            L&apos;onglet &quot;Statements&quot; montre les déclarations biologiques complètes
+            extraites des articles, avec les références et le texte d&apos;évidence.
+          </p>
+        </div>
+
+        <div className="pt-2">
+          <p className="text-sm text-indigo-600">
+            Pour plus d&apos;informations sur INDRA (Integrated Network and
+            Dynamical Reasoning Assembler), visitez{" "}
+            <a
+              href="https://indra.bio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium underline"
+            >
+              indra.bio
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
-};
-
-export default InstructionsPanel;
+} 
